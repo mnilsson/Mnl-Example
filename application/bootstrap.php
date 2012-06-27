@@ -1,46 +1,49 @@
 <?php
+
+require_once(APPLICATION_PATH.'/../library/Mnl/library/Mnl/Loader.php');
+
 class Bootstrap
 {
-    public $registry;
     public function initAutoloader()
     {
-        require_once(APPLICATION_PATH.'/../library/Mnl/Loader.php');
-        Mnl_Loader::registerAutoload();
+        $autoloader = new Mnl\Loader();
 
-        Mnl_Loader_Paths::getInstance()->registerPath(
-            'library',
-            APPLICATION_PATH.'/../library/'
-        );
+        $autoloader->registerPath(APPLICATION_PATH.'/../library/Mnl/library/');
+        $autoloader->registerPath(APPLICATION_PATH.'/models/');
        
-        Mnl_Loader_Paths::getInstance()->registerPath(
-            'models',
-            APPLICATION_PATH.'/models/'
-        );
+        $autoloader->registerAutoload();
     }
 
     public function setupRegistry()
     {
-        $this->registry = Mnl_Registry::getInstance();
+        $this->registry = Mnl\Registry::getInstance();
     }
     
     public function initView()
     {
-        $this->registry->templatePath = APPLICATION_PATH.'/views/';
-        
-        Mnl_View_Helper_Loader::getInstance()->registerHelperPath(
-            'Mnl_View_Helper_', 
-            APPLICATION_PATH.'/../library/Mnl/View/Helper/'
+        \Mnl\View::setTemplateDirectory(APPLICATION_PATH.'/views');
+
+
+        \Mnl\View\Helper\Loader::getInstance()->registerHelperPath(
+            'Mnl\View\Helper\\',
+            APPLICATION_PATH.'/../library/Mnl/library/Mnl/View/Helper/'
         );
     }
 
-    public function deployRouter()
+    public function deployRouter($request)
     {
-        Mnl_Registry::getInstance()->defaultControllerPath = "controllers";
-        define('defaultAction',"index");
-        define('defaultController',"Default");
-        define('BASE_URL', webLocation);
-        $router = new Mnl_Router();
-        
+        Mnl\Registry::getInstance()->defaultControllerPath = "controllers";
+
+        define('BASE_URL', '/');
+
+        $request = substr($request, strlen(','));
+        $router = new \Mnl\Router();
+
+        include (APPLICATION_PATH.'/routes.php');
+
+        $router->setRoutes($collection);
+        $router->setControllerDirectory('controllers');
+        $router->run($request);
     }
 
     public static function run()
@@ -49,6 +52,5 @@ class Bootstrap
         $bootstrapper->initAutoloader();
         $bootstrapper->setupRegistry();
         $bootstrapper->initView();
-        $bootstrapper->deployRouter();
     }
 }

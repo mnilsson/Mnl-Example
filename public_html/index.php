@@ -12,5 +12,8 @@ set_include_path(
 );
 
 require APPLICATION_PATH.'/bootstrap.php';
-Bootstrap::run();
+$bootstrap = new Bootstrap();
+$bootstrap->run();
+$bootstrap->deployRouter($_SERVER['REQUEST_URI']);
+
 
