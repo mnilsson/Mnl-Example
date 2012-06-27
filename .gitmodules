@@ -1,0 +1,3 @@
+[submodule "library/Mnl"]
+	path = library/Mnl
+	url = git://github.com/mnilsson/Mnl.git
